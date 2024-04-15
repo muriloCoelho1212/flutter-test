@@ -27,9 +27,18 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
-
   void getNext() {
     current = WordPair.random();
+    notifyListeners();
+  }
+
+  var favorites = <WordPair>[];
+  void toogleFavorite() {
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+    } else {
+      favorites.add(current);
+    }
     notifyListeners();
   }
 }
@@ -40,16 +49,36 @@ class MyHomePage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
 
+    IconData icon;
+    if(appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('A random AWESOME test idea:'),
             BigCard(pair: pair),
-            ElevatedButton(onPressed: () {
-              appState.getNext();
-            }, child: Text('Next'))
+            SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                    onPressed: () {
+                    appState.toogleFavorite();
+                  }, 
+                  label: Text('Favorites'),
+                  icon: Icon(icon),
+                ),
+                SizedBox(width: 10,),
+                ElevatedButton(onPressed: () {
+                  appState.getNext();
+                }, child: Text('Next'))
+              ],
+            )
           ],
         ),
       ),
@@ -74,7 +103,7 @@ class BigCard extends StatelessWidget {
 
     return Card(
       color: theme.colorScheme.primary,
-      elevation: 8,
+      elevation: 5,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Text(pair.asLowerCase, style: style, semanticsLabel: "${pair.first} ${pair.second}",),
